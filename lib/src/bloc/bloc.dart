@@ -16,10 +16,6 @@ class Bloc extends Object with Validator {
   Function(String) get changeUserName => _userName.sink.add;
   Function(String) get changePassword => _password.sink.add;
 
-  submit() {
-    return 'Hello ${_userName.value}';
-  }
-
   dispose() {
     _userName.close();
     _password.close();

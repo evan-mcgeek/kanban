@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../bloc/bloc.dart';
 import '../bloc/provider.dart';
+import 'package:kanban/src/screens/kanban_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -8,8 +9,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  String _message = "";
-
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of(context);
@@ -50,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             errorText: snapshot.error,
             errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: Color(0xFF84293A)),
               borderRadius: BorderRadius.circular(32.0),
             ),
           ),
@@ -75,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             errorText: snapshot.error,
             errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.red),
+              borderSide: BorderSide(color: Color(0xFF84293A)),
               borderRadius: BorderRadius.circular(32.0),
             ),
           ),
@@ -95,7 +94,12 @@ class _LoginScreenState extends State<LoginScreen> {
           child: MaterialButton(
             minWidth: MediaQuery.of(context).size.width,
             padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => KanbanScreen()),
+              );
+            },
             child: Text(
               "Log in",
               textAlign: TextAlign.center,
@@ -105,17 +109,17 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         );
 
-        RaisedButton(
-          child: Text('submit'),
-          color: Colors.blue,
-          onPressed: !snapshot.hasData
-              ? null
-              : () {
-                  setState(() {
-                    _message = bloc.submit();
-                  });
-                },
-        );
+        // RaisedButton(
+        //   child: Text('submit'),
+        //   color: Colors.blue,
+        //   onPressed: !snapshot.hasData
+        //       ? null
+        //       : () {
+        //           setState(() {
+        //             _message = bloc.submit();
+        //           });
+        //         },
+        // );
       },
     );
   }

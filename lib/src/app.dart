@@ -9,14 +9,13 @@ class App extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Kanban',
-        theme: ThemeData.dark(),
+        theme: ThemeData.dark().copyWith(scaffoldBackgroundColor: Colors.black),
         home: SafeArea(
           child: Scaffold(
             appBar: AppBar(
               title: Text('Kanban'),
             ),
             body: LoginScreen(),
-            backgroundColor: Colors.black,
           ),
         ),
       ),
