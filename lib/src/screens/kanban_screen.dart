@@ -48,17 +48,25 @@ class _KanbanScreenState extends State<KanbanScreen> {
             body: TabBarView(
               children: tabs.map((Tab tab) {
                 return ListView.separated(
-                    separatorBuilder: (_, __) => Divider(height: 10),
+                    physics: BouncingScrollPhysics(),
                     itemCount: 20,
-                    itemBuilder: (_, index) {
-                      return ListTile(
-                        tileColor: Color(0xFF424242),
-                        title: Text(
-                          "Unique ID",
-                          style: TextStyle(fontSize: 10),
+                    separatorBuilder: (context, index) => Divider(
+                          height: 5,
                         ),
-                        subtitle: Text('Task ' + (tab.text).toLowerCase()),
-                        onTap: () {},
+                    itemBuilder: (_, index) {
+                      return Card(
+                        color: Color(0xFF424242),
+                        child: ListTile(
+                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                          title: Text(
+                            "Unique ID",
+                            style: TextStyle(fontSize: 10),
+                          ),
+                          subtitle: Text('Task ' + (tab.text).toLowerCase()),
+                          onTap: () {
+                            print('Card tapped');
+                          },
+                        ),
                       );
                     });
               }).toList(),
@@ -69,41 +77,3 @@ class _KanbanScreenState extends State<KanbanScreen> {
     );
   }
 }
-
-// ListView.separated(
-// separatorBuilder: (_, __) => Divider(height: 10),
-// itemCount: 20,
-// itemBuilder: (_, index) {
-// return ListTile(
-// tileColor: Colors.blueGrey,
-// title: Text(
-// "ID",
-// style: TextStyle(fontSize: 10),
-// ),
-// subtitle: Text(
-// 'Subtitle Subtitle Subtitle Subtitle Subtitle Subtitle Subtitle SubtitleSubtitleSubtitleSubtitle'),
-// onTap: () {},
-// );
-// }),
-
-//         appBar: AppBar(
-//         automaticallyImplyLeading: false,
-//         actions: [
-//           IconButton(
-//             icon: Icon(Icons.logout),
-//             tooltip: 'Log Out',
-//             onPressed: () {},
-//           ),
-//         ],
-//         bottom: TabBar(
-//           isScrollable: true,
-//           tabs: tabs,
-//           ],
-//         ),
-//       ),
-//       body:
-//   ),
-//   ),
-//   ),
-//   );
-// }

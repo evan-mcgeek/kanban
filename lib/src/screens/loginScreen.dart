@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 import '../bloc/bloc.dart';
 import '../bloc/provider.dart';
 import 'package:kanban/src/screens/kanban_screen.dart';
+import 'package:kanban/main.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert' show json, base64, ascii;
+import 'home_page.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -9,6 +14,23 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  Future<String> attemptLogIn(String username, String password) async {
+    var response = await http.post("$SERVER_IP/users/login/",
+        body: {"username": username, "password": password});
+    if (response.statusCode == 200) return response.body;
+    return null;
+  }
+
+  void displayDialog(BuildContext context, String title, String text) =>
+      showDialog(
+        context: context,
+        builder: (context) =>
+            AlertDialog(title: Text(title), content: Text(text)),
+      );
+
   @override
   Widget build(BuildContext context) {
     final bloc = Provider.of(context);
@@ -38,6 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       stream: bloc.userNameStream,
       builder: (context, snapshot) {
         return TextField(
+          controller: _usernameController,
           textAlign: TextAlign.center,
           obscureText: false,
           onChanged: bloc.changeUserName,
@@ -63,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
       stream: bloc.passwordStream,
       builder: (context, snapshot) {
         return TextField(
+          controller: _passwordController,
           textAlign: TextAlign.center,
           obscureText: true,
           onChanged: bloc.changePassword,
@@ -94,11 +118,22 @@ class _LoginScreenState extends State<LoginScreen> {
           child: MaterialButton(
             minWidth: MediaQuery.of(context).size.width,
             padding: EdgeInsets.fromLTRB(20.0, 15.0, 20.0, 15.0),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => KanbanScreen()),
-              );
+            onPressed: () async {
+              var username = _usernameController.text;
+              var password = _passwordController.text;
+              var response = await http.post("$SERVER_IP/users/login/",
+                  body: {"username": username, "password": password});
+              var jwt = await attemptLogIn(username, password);
+              if (jwt != null) {
+                storage.write(key: "jwt", value: jwt);
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => KanbanScreen()));
+              } else {
+                displayDialog(context, "", response.body);
+              }
+              Map<String, dynamic> decodedToken = JwtDecoder.decode(jwt);
+              print(jwt);
+              print(decodedToken);
             },
             child: Text(
               "Log in",
