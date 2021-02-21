@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'login_screen.dart';
 
 class KanbanScreen extends StatefulWidget {
   @override
@@ -16,13 +17,10 @@ class _KanbanScreenState extends State<KanbanScreen> {
   Widget build(BuildContext context) {
     return DefaultTabController(
       length: tabs.length,
-      // The Builder widget is used to have a different BuildContext to access
-      // closest DefaultTabController.
       child: Builder(builder: (BuildContext context) {
         final TabController tabController = DefaultTabController.of(context);
         tabController.addListener(() {
           if (!tabController.indexIsChanging) {
-            // Your code goes here.
             // To get index of current tab use tabController.index
           }
         });
@@ -36,7 +34,9 @@ class _KanbanScreenState extends State<KanbanScreen> {
                   icon: Icon(Icons.logout),
                   tooltip: 'Log Out',
                   onPressed: () {
-                    Navigator.pop(context);
+                    //TODO: proper code for logout
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
                 ),
               ],
