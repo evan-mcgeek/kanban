@@ -17,10 +17,10 @@ class _KanbanScreenState extends State<KanbanScreen> {
   bool _isLoading = false;
 
   final List<Tab> tabs = <Tab>[
-    Tab(text: "0"),
-    Tab(text: "1"),
-    Tab(text: "2"),
-    Tab(text: "3"),
+    Tab(text: "On hold"),
+    Tab(text: "In progress"),
+    Tab(text: "Needs review"),
+    Tab(text: "Approved"),
   ];
 
   @override
@@ -43,12 +43,12 @@ class _KanbanScreenState extends State<KanbanScreen> {
 
   @override
   Widget build(BuildContext context) {
-    ListView listViewBuilder(String tab) {
+    ListView listViewBuilder() {
       return ListView.builder(
         itemCount: _apiResponse.data.length,
         physics: BouncingScrollPhysics(),
         itemBuilder: (_, index) {
-          if (_apiResponse.data[index].row == tab) {
+          if (_apiResponse.data[index].row != "") {
             return Card(
               margin: EdgeInsets.all(4),
               color: Color(0xFF424242),
@@ -114,10 +114,10 @@ class _KanbanScreenState extends State<KanbanScreen> {
             body: TabBarView(
               controller: tabController,
               children: [
-                listViewBuilder("0"),
-                listViewBuilder("1"),
-                listViewBuilder("2"),
-                listViewBuilder("3"),
+                listViewBuilder(),
+                listViewBuilder(),
+                listViewBuilder(),
+                listViewBuilder(),
               ],
             ),
           );
