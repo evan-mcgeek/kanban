@@ -3,15 +3,10 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../bloc/bloc.dart';
 import '../bloc/provider.dart';
 import 'package:kanban/src/screens/kanban_screen.dart';
-import 'package:kanban/main.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert' show json, base64, ascii;
-import 'package:kanban/my_app.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'dart:convert';
-import 'dart:async';
 import 'package:kanban/src/services/kanban_service.dart';
-import 'package:kanban/src/screens/kanban_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -19,13 +14,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  Future<String> attemptLogIn(String username, String password) async {
-    var response = await http.post("$url/users/login/",
-        body: {"username": username, "password": password});
-    if (response.statusCode == 200) return response.body;
-    return null;
-  }
-
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -132,20 +120,18 @@ class _LoginScreenState extends State<LoginScreen> {
             onPressed: () async {
               var username = _usernameController.text;
               var password = _passwordController.text;
-              var response = await http.post("$url/users/login/",
+              var response = await http.post("$API/users/login/",
                   body: {"username": username, "password": password});
-              var jwt = await attemptLogIn(username, password);
+              String jwt = await attemptLogIn(username, password);
               if (jwt != null) {
-                jwt = jwt.split(', ').join(".");
-                storage.write(key: "jwt", value: jwt);
+                String updJwt = jsonDecode(jwt)["token"].split(', ').join(".");
+                FlutterSecureStorage().write(key: "jwt", value: updJwt);
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => KanbanScreen()));
               } else {
                 displayDialog(
                     context, "", json.decode(response.body).toString());
               }
-              //Map<String, dynamic> decodedToken = JwtDecoder.decode(jwt);
-              //print(decodedToken);
             },
             child: Text(
               "Log in",

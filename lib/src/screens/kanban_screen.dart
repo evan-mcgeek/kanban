@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'login_screen.dart';
+import 'package:kanban/src/services/kanban_service.dart';
+import 'package:get_it/get_it.dart';
+import 'package:kanban/src/models/card_for_listing.dart';
+import 'package:kanban/src/models/api_response.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class KanbanScreen extends StatefulWidget {
   @override
@@ -7,26 +12,87 @@ class KanbanScreen extends StatefulWidget {
 }
 
 class _KanbanScreenState extends State<KanbanScreen> {
+  KanbanService get service => GetIt.instance<KanbanService>();
+  APIResponse<List<CardForListing>> _apiResponse;
+  bool _isLoading = false;
+
   final List<Tab> tabs = <Tab>[
-    Tab(text: 'On hold'),
-    Tab(text: 'In progress'),
-    Tab(text: 'Needs review'),
-    Tab(text: 'Approved'),
+    Tab(text: "0"),
+    Tab(text: "1"),
+    Tab(text: "2"),
+    Tab(text: "3"),
   ];
+
+  @override
+  void initState() {
+    _fetchCards();
+    super.initState();
+  }
+
+  _fetchCards() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    _apiResponse = await service.getCardsList();
+
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: tabs.length,
-      child: Builder(builder: (BuildContext context) {
-        final TabController tabController = DefaultTabController.of(context);
-        tabController.addListener(() {
-          if (!tabController.indexIsChanging) {
-            // To get index of current tab use tabController.index
+    ListView listViewBuilder(String tab) {
+      return ListView.builder(
+        itemCount: _apiResponse.data.length,
+        physics: BouncingScrollPhysics(),
+        itemBuilder: (_, index) {
+          if (_apiResponse.data[index].row == tab) {
+            return Card(
+              margin: EdgeInsets.all(4),
+              color: Color(0xFF424242),
+              child: ListTile(
+                contentPadding: EdgeInsets.all(10),
+                title: Text(
+                  'ID: ' + _apiResponse.data[index].id.toString(),
+                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                ),
+                subtitle: Text(
+                  _apiResponse.data[index].text,
+                  style: TextStyle(fontSize: 16),
+                ),
+                onTap: () {
+                  //TODO: edit function
+                },
+                onLongPress: () {
+                  //TODO: delete function
+                },
+              ),
+            );
           }
-        });
+        },
+      );
+    }
 
-        return SafeArea(
-          child: Scaffold(
+    return Builder(builder: (_) {
+      if (_isLoading) {
+        return Center(child: CircularProgressIndicator());
+      }
+      if (_apiResponse.error) {
+        return Center(
+          child: Text(_apiResponse.errorMessage),
+        );
+      }
+      return DefaultTabController(
+        length: tabs.length,
+        child: Builder(builder: (BuildContext context) {
+          final TabController tabController = DefaultTabController.of(context);
+          tabController.addListener(() {
+            if (!tabController.indexIsChanging) {}
+          });
+
+          return Scaffold(
             appBar: AppBar(
               automaticallyImplyLeading: false,
               actions: [
@@ -34,7 +100,7 @@ class _KanbanScreenState extends State<KanbanScreen> {
                   icon: Icon(Icons.logout),
                   tooltip: 'Log Out',
                   onPressed: () {
-                    //TODO: proper code for logout
+                    FlutterSecureStorage().delete(key: "jwt");
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => LoginScreen()));
                   },
@@ -46,34 +112,17 @@ class _KanbanScreenState extends State<KanbanScreen> {
               ),
             ),
             body: TabBarView(
-              children: tabs.map((Tab tab) {
-                return ListView.separated(
-                    physics: BouncingScrollPhysics(),
-                    itemCount: 20,
-                    separatorBuilder: (context, index) => Divider(
-                          height: 5,
-                        ),
-                    itemBuilder: (_, index) {
-                      return Card(
-                        color: Color(0xFF424242),
-                        child: ListTile(
-                          contentPadding: EdgeInsets.symmetric(horizontal: 10),
-                          title: Text(
-                            "Unique ID",
-                            style: TextStyle(fontSize: 10),
-                          ),
-                          subtitle: Text('Task ' + (tab.text).toLowerCase()),
-                          onTap: () {
-                            print('Card tapped');
-                          },
-                        ),
-                      );
-                    });
-              }).toList(),
+              controller: tabController,
+              children: [
+                listViewBuilder("0"),
+                listViewBuilder("1"),
+                listViewBuilder("2"),
+                listViewBuilder("3"),
+              ],
             ),
-          ),
-        );
-      }),
-    );
+          );
+        }),
+      );
+    });
   }
 }

@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:kanban/src/screens/login_screen.dart';
 import 'dart:convert' show json, base64, ascii;
 import 'package:kanban/src/bloc/provider.dart';
-import 'package:http/http.dart' as http;
 import 'package:kanban/src/screens/kanban_screen.dart';
-import 'package:kanban/src/services/kanban_service.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class MyApp extends StatelessWidget {
   Future<String> get jwtOrEmpty async {
-    var jwt = await storage.read(key: "jwt");
+    var jwt = await FlutterSecureStorage().read(key: "jwt");
     if (jwt == null) return "";
     return jwt;
   }
@@ -37,7 +36,7 @@ class MyApp extends StatelessWidget {
                       ),
                     ),
                   );
-                  print(jwt);
+                  //print(payload);
                   if (DateTime.fromMillisecondsSinceEpoch(payload["exp"] * 1000)
                       .isAfter(DateTime.now())) {
                     return KanbanScreen();
