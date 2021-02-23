@@ -14,4 +14,5 @@ class CardForListing {
       text: item['text'],
     );
   }
+  Comparator<CardForListing> sortById = (a, b) => a.id.compareTo(b.id);
 }

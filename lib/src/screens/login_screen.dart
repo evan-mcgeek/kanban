@@ -4,7 +4,7 @@ import '../bloc/bloc.dart';
 import '../bloc/provider.dart';
 import 'package:kanban/src/screens/kanban_screen.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert' show json, base64, ascii;
+import 'dart:convert' show json;
 import 'dart:convert';
 import 'package:kanban/src/services/kanban_service.dart';
 
@@ -129,8 +129,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => KanbanScreen()));
               } else {
+                print(response.body);
+                String errorText =
+                    json.decode(response.body).toString().split(': ')[1];
                 displayDialog(
-                    context, "", json.decode(response.body).toString());
+                    context,
+                    'Error ' + response.statusCode.toString(),
+                    errorText.substring(1, errorText.length - 3));
               }
             },
             child: Text(

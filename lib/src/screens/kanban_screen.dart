@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'login_screen.dart';
 import 'package:kanban/src/services/kanban_service.dart';
 import 'package:get_it/get_it.dart';
@@ -11,10 +12,12 @@ class KanbanScreen extends StatefulWidget {
   _KanbanScreenState createState() => _KanbanScreenState();
 }
 
-class _KanbanScreenState extends State<KanbanScreen> {
+class _KanbanScreenState extends State<KanbanScreen>
+    with TickerProviderStateMixin {
   KanbanService get service => GetIt.instance<KanbanService>();
   APIResponse<List<CardForListing>> _apiResponse;
   bool _isLoading = false;
+  TabController controller;
 
   final List<Tab> tabs = <Tab>[
     Tab(text: "On hold"),
@@ -26,7 +29,13 @@ class _KanbanScreenState extends State<KanbanScreen> {
   @override
   void initState() {
     _fetchCards();
+    controller = new TabController(vsync: this, length: tabs.length);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   _fetchCards() async {
@@ -41,22 +50,22 @@ class _KanbanScreenState extends State<KanbanScreen> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    ListView listViewBuilder() {
-      return ListView.builder(
+  // @override
+  // bool get wantKeepAlive => true;
+  ListView listViewBuilder(String tab) => ListView.builder(
         itemCount: _apiResponse.data.length,
         physics: BouncingScrollPhysics(),
+        padding: EdgeInsets.all(4),
         itemBuilder: (_, index) {
-          if (_apiResponse.data[index].row != "") {
+          if (_apiResponse.data[index].row == tab) {
             return Card(
-              margin: EdgeInsets.all(4),
               color: Color(0xFF424242),
               child: ListTile(
+                dense: true,
                 contentPadding: EdgeInsets.all(10),
                 title: Text(
                   'ID: ' + _apiResponse.data[index].id.toString(),
-                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                 ),
                 subtitle: Text(
                   _apiResponse.data[index].text,
@@ -70,59 +79,51 @@ class _KanbanScreenState extends State<KanbanScreen> {
                 },
               ),
             );
+          } else {
+            return SizedBox(height: 0);
           }
         },
       );
-    }
 
-    return Builder(builder: (_) {
-      if (_isLoading) {
-        return Center(child: CircularProgressIndicator());
-      }
-      if (_apiResponse.error) {
-        return Center(
-          child: Text(_apiResponse.errorMessage),
-        );
-      }
-      return DefaultTabController(
-        length: tabs.length,
-        child: Builder(builder: (BuildContext context) {
-          final TabController tabController = DefaultTabController.of(context);
-          tabController.addListener(() {
-            if (!tabController.indexIsChanging) {}
-          });
-
-          return Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: false,
-              actions: [
-                IconButton(
-                  icon: Icon(Icons.logout),
-                  tooltip: 'Log Out',
-                  onPressed: () {
-                    FlutterSecureStorage().delete(key: "jwt");
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => LoginScreen()));
-                  },
-                ),
-              ],
-              bottom: TabBar(
-                isScrollable: true,
-                tabs: tabs,
-              ),
-            ),
-            body: TabBarView(
-              controller: tabController,
-              children: [
-                listViewBuilder(),
-                listViewBuilder(),
-                listViewBuilder(),
-                listViewBuilder(),
-              ],
-            ),
+  @override
+  Widget build(BuildContext context) => Builder(builder: (_) {
+        if (_isLoading) {
+          return Center(child: CircularProgressIndicator());
+        }
+        if (_apiResponse.error) {
+          return Center(
+            child: Text(_apiResponse.errorMessage),
           );
-        }),
-      );
-    });
-  }
+        }
+        return Scaffold(
+          appBar: AppBar(
+            automaticallyImplyLeading: false,
+            actions: [
+              IconButton(
+                icon: Icon(Icons.logout),
+                tooltip: 'Log Out',
+                onPressed: () {
+                  FlutterSecureStorage().delete(key: "jwt");
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
+                },
+              ),
+            ],
+            bottom: TabBar(
+              controller: controller,
+              isScrollable: true,
+              tabs: tabs,
+            ),
+          ),
+          body: TabBarView(
+            controller: controller,
+            children: [
+              listViewBuilder('0'),
+              listViewBuilder('1'),
+              listViewBuilder('2'),
+              listViewBuilder('3'),
+            ],
+          ),
+        );
+      });
 }

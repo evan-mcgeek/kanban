@@ -29,6 +29,7 @@ class KanbanService {
         for (var item in jsonData) {
           cards.add(CardForListing.fromJson(item));
         }
+        cards.sort(CardForListing().sortById);
 
         return APIResponse<List<CardForListing>>(data: cards);
       }
